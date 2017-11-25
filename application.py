@@ -14,7 +14,7 @@ dataset = dataset.Dataset()
 sess.run(tf.global_variables_initializer())
 model_object.print_something()
 # train
-model_object.train_model(sess, dataset, 1)
+model_object.train_model(sess, dataset, 10)
 
 
 
