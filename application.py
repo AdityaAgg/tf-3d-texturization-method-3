@@ -19,7 +19,7 @@ model_object.train_model(sess, dataset, 1)
 
 
 # saver
-t_vars = tf.train.Saver(model_object.vars_G + model_object.vars_E + model_object.vars_D)
+t_vars = [model_object.vars_G + model_object.vars_E + model_object.vars_D]
 saver = tf.train.Saver(t_vars)
 saver.save(sess, 'params_b/sgan')
 
