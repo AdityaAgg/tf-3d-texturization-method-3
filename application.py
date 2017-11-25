@@ -14,12 +14,12 @@ dataset = dataset.Dataset()
 sess.run(tf.global_variables_initializer())
 model_object.print_something()
 # train
-model_object.train_model(sess, dataset, 10)
+model_object.train_model(sess, dataset, 1)
 
 
 
 # saver
-t_vars = tf.train.Saver(model.vars_G + model.vars_E + model.vars_D)
+t_vars = tf.train.Saver(model_object.vars_G + model_object.vars_E + model_object.vars_D)
 saver = tf.train.Saver(t_vars)
 saver.save(sess, 'params_b/sgan')
 
