@@ -1,5 +1,5 @@
 import numpy as np
-import binvox_rw as binvox
+import lib.binvox_rw.binvox_rw as binvox
 import os
 import cv2
 

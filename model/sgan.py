@@ -30,18 +30,13 @@ class Model(object):
             for batch in range(iters_per_epoch):
                 step += 1
                 x, picture, geometry = dataset.next_batch(self.batch_size)
-                print "log a"
                 noise = np.random.uniform(-1, 1, size=(self.batch_size, self.nz))
-                print "log b"
                 dis_feed_dict = {self.z: noise, self.models_colored_rgb: x, self.color: picture,
                                  self.models_binvox: geometry, self.train: True}
-                print "log c"
                 _, dis_loss = sess.run([self.D_opt, self.discrim_loss], feed_dict=dis_feed_dict)
 
-                print "log d"
                 gen_feed_dict = {self.z: noise, self.models_binvox: geometry, self.train: True, self.color: picture}
                 _, gen_loss = sess.run([self.G_opt, self.gen_loss], feed_dict=gen_feed_dict)
-                print "log e"
                 # if step % self.log_step == 0:
                 print('Iteration {0}: dis loss = {1:.4f}, gen loss = {2:.4f}'.format(step, dis_loss, gen_loss))
 
