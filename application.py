@@ -18,7 +18,7 @@ saver = tf.train.Saver(model_object.vars_G + model_object.vars_E + model_object.
 #saver.restore(sess, "params_c/sgan_model.ckpt")
 
 # train
-model_object.train_model(sess, dataset, 25)
+model_object.train_model(sess, dataset, 10)
 
 # test
 
