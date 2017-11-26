@@ -28,7 +28,7 @@ model_object.train_model(sess, dataset, 25)
 # saver
 
 
-#saver.save(sess, 'params_b/sgan')
+saver.save(sess, 'params_b/sgan')
 
 # opt_engine = ConstrainedOpt(model)
 
