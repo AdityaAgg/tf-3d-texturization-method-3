@@ -81,7 +81,7 @@ class Model(object):
 
         enc = Encoder()
         gen = Generator()
-        dis = Discriminator(self.n_cls, self.nz)
+        dis = Discriminator()
 
         # encoders
         h4, h3, h2 = enc.color(self.color, self.train, self.n_cls)
@@ -91,11 +91,11 @@ class Model(object):
         self.style_gen = gen.style(self.models_binvox, h4, h3, h2, self.train)
 
         # discriminator on generated
-        d_f, _, _ = dis(self.style_gen, self.color, self.train, name='d_style')
+        d_f= dis.discriminate(self.style_gen,h4, h3, h2, self.train, name='d_style')
 
         # discriminator on colored results
         # self.model_disc_results = dis.discriminate(self.models_colored_rgb, h4, h3, h2, self.train)
-        d_r, _, _ = dis(self.models_colored_rgb, self.color, self.train, name='d_style', reuse=True)
+        d_r =dis.discriminate(self.models_colored_rgb, h4, h3, h2, self.train, name='d_style', reuse=True)
 
         # discriminator loss
         self.discrim_loss = tf.reduce_mean(sigmoid_ce_with_logits(d_r, tf.ones_like(d_r))) + tf.reduce_mean(
@@ -212,108 +212,107 @@ class Generator(object):
             return tf.nn.tanh(c)
 
 
-# class Discriminator(object):
-#     def discriminate(self, x, h4, h3, h2, train, nc=3, nf = 16, dropout=0.75, name="d_model", reuse=False):
-#         with tf.variable_scope(name, reuse=reuse):
-#             batch_size, _, _, _, _ = x.get_shape().as_list()
-#             _, _, _, nif4 = h4.get_shape().as_list()
-#             _, _, _, nif3 = h3.get_shape().as_list()
-#             _, _, _, nif2 = h2.get_shape().as_list()
-#
-#             h4 = tf.tile(tf.expand_dims(h4, 1), [1, 4, 1, 1, 1])
-#             h3 = tf.tile(tf.expand_dims(h3, 1), [1, 8, 1, 1, 1])
-#             h2 = tf.tile(tf.expand_dims(h2, 1), [1, 16, 1, 1, 1])
-#
-#             # let us say some tanh inverse function
-#
-#             #first conv_transpose
-#             dis_1 = deconv3d(x, [4, 4, 4, nc, nf*2], [batch_size, 32, 32, 32, nf* 2],  'dis_1', bias=True) #turning off stride 1 on conv_transposes
-#             dis_1_post = tf.nn.dropout(tf.nn.elu(dis_1), keep_prob(dropout, train))
-#
-#             #first conv
-#             dis_2 = conv3d(dis_1_post, [4, 4, 4,  nf * 2, nf * 2],'dis_2', bias=True)
-#             dis_2 = tf.concat([dis_2, h2], 4)
-#             dis_2_post = tf.nn.dropout(tf.nn.elu(dis_2), keep_prob(dropout, train))
-#
-#
-#             #second_conv_transpose
-#             dis_3 = deconv3d(dis_2_post, [4, 4, 4, nf * 2 + nif2, nf * 4], [batch_size, 16, 16, 16, nf * 4], 'dis_3', bias=True)
-#             dis_3_post = tf.nn.dropout(tf.nn.elu(dis_3), keep_prob(dropout, train))
-#
-#             #second conv
-#             dis_4 = conv3d(dis_3_post, [4, 4, 4,  nf * 4, nf * 4], 'dis_4', bias=True)
-#             dis_4 = tf.concat([dis_4, h3], 4)
-#             dis_4_post = tf.nn.dropout(tf.nn.elu(dis_4), keep_prob(dropout, train))
-#
-#
-#             #third conv_transpose
-#             dis_5 = deconv3d(dis_4, [4, 4, 4, nf * 4 + nif3, nf * 8], [batch_size, 8, 8, 8, nf * 8], 'dis_5', bias=True)
-#             dis_5_post = tf.nn.dropout(tf.nn.elu(dis_5), keep_prob(dropout, train))
-#
-#             #third conv
-#             dis_6 = conv3d(dis_5_post, [4, 4, 4, nf * 8, nf * 8], 'dis_6', bias=True)
-#             dis_6 = tf.concat([dis_6, h4], 4)
-#             dis_6_post = tf.nn.dropout(tf.nn.elu(dis_6), keep_prob(dropout, train))
-#
-#             #fourth conv_transpose
-#             dis_7 = deconv3d(dis_6_post, [4, 4, 4, nf * 8 + nif4, nf * 8], [batch_size, 4, 4, 4, nf * 8], 'dis_7', bias=True)
-#             dis_7_post = tf.nn.dropout(tf.nn.elu(dis_7), keep_prob(dropout, train))
-#
-#             f = tf.reshape(dis_7_post, [-1, 4 * 4 * 4 * nf * 8])
-#             dis_label = linear(f, [4 * 4 * 4 * nf * 8, 1], 'dis_label', bias=True)
-#             return tf.nn.sigmoid(dis_label)
-
-
 class Discriminator(object):
-    def __init__(self, n_cls, nz):
-        self.n_cls = n_cls
-        self.nz = nz
-        self.enc = Encoder()
-
-    def __call__(self, x, c, train, nf=16, name="d_style", reuse=False):
+    def discriminate(self, x, h4, h3, h2, train, nc=3, nf = 16, dropout=0.75, name="d_style", reuse=False):
         with tf.variable_scope(name, reuse=reuse):
-            shape = x.get_shape().as_list()
-            batch_size = shape[0]
+            batch_size, _, _, _, _ = x.get_shape().as_list()
+            _, _, _, nif4 = h4.get_shape().as_list()
+            _, _, _, nif3 = h3.get_shape().as_list()
+            _, _, _, nif2 = h2.get_shape().as_list()
 
-            if name == 'd_style':
-                nc = 3
-            else:
-                nc = 1
+            h4 = tf.tile(tf.expand_dims(h4, 1), [1, 4, 1, 1, 1])
+            h3 = tf.tile(tf.expand_dims(h3, 1), [1, 8, 1, 1, 1])
+            h2 = tf.tile(tf.expand_dims(h2, 1), [1, 16, 1, 1, 1])
 
-            # add noise
-            x += tf.random_normal(shape)
-            c += tf.random_normal(c.get_shape())
+            # let us say some tanh inverse function
+            #first conv_transpose
+            dis_1 = conv3d(x, [4, 4, 4, nc, nf*2],  'dis_1', bias=True, stride=1) #turning off stride 1 on conv_transposes
+            dis_1_post = tf.nn.dropout(tf.nn.elu(dis_1), keep_prob(dropout, train))
 
-            # encode image
-            hc = self.enc.edge(c, train, self.n_cls, nc=nc, reuse=reuse)
-            hc = tf.reshape(hc, [batch_size, -1])
+            #first conv
+            dis_2 = conv3d(dis_1_post, [4, 4, 4,  nf * 2, nf * 2],'dis_2', bias=True)
+            dis_2 = tf.concat([dis_2, h2], 4)
+            dis_2_post = tf.nn.dropout(tf.nn.elu(dis_2), keep_prob(dropout, train))
 
-            # encode voxels
-            u = conv3d(x, [4, 4, 4, nc, nf], 'h1', bias=True, stride=1)
-            hx = lrelu(u)
 
-            u = conv3d(hx, [4, 4, 4, nf, nf * 2], 'h2')
-            hx = lrelu(batch_norm(u, train, 'bn2'))
+            #second_conv_transpose
+            dis_3 = conv3d(dis_2_post, [4, 4, 4, nf * 2 + nif2,  nf * 4], 'dis_3', bias=True, stride=1)
+            dis_3_post = tf.nn.dropout(tf.nn.elu(dis_3), keep_prob(dropout, train))
 
-            u = conv3d(hx, [4, 4, 4, nf * 2, nf * 4], 'h3')
-            hx = lrelu(batch_norm(u, train, 'bn3'))
+            #second conv
+            dis_4 = conv3d(dis_3_post, [4, 4, 4,  nf * 4, nf * 4], 'dis_4', bias=True)
+            dis_4 = tf.concat([dis_4, h3], 4)
+            dis_4_post = tf.nn.dropout(tf.nn.elu(dis_4), keep_prob(dropout, train))
 
-            u = conv3d(hx, [4, 4, 4, nf * 4, nf * 8], 'h4')
-            hx = lrelu(batch_norm(u, train, 'bn4'))
 
-            u = conv3d(hx, [4, 4, 4, nf * 8, nf * 16], 'h5')
-            hx = lrelu(batch_norm(u, train, 'bn5'))
-            hx = tf.reshape(hx, [batch_size, -1])
+            #third conv_transpose
+            dis_5 = conv3d(dis_4, [4, 4, 4, nf * 4 + nif3, nf * 8], 'dis_5', bias=True, stride=1)
+            dis_5_post = tf.nn.dropout(tf.nn.elu(dis_5), keep_prob(dropout, train))
 
-            # discriminator
-            h = tf.concat([hc, hx], 1)
-            d = linear(h, [h.get_shape().as_list()[-1], 1], 'd', bias=True)
+            #third conv
+            dis_6 = conv3d(dis_5_post, [4, 4, 4, nf * 8, nf * 8], 'dis_6', bias=True)
+            dis_6 = tf.concat([dis_6, h4], 4)
+            dis_6_post = tf.nn.dropout(tf.nn.elu(dis_6), keep_prob(dropout, train))
 
-            # classifier
-            y = linear(hx, [hx.get_shape().as_list()[-1], self.n_cls], 'y', bias=True)
+            #fourth conv_transpose
+            dis_7 = conv3d(dis_6_post, [4, 4, 4, nf * 8 + nif4, nf * 8],'dis_7', bias=True, stride=1)
+            dis_7_post = tf.nn.dropout(tf.nn.elu(dis_7), keep_prob(dropout, train))
 
-            # posterior
-            u = linear(hx, [hx.get_shape().as_list()[-1], self.nz], 'z', bias=True)
-            z = tf.nn.tanh(u)
+            f = tf.reshape(dis_7_post, [-1, 4 * 4 * 4 * nf * 8])
+            dis_label = linear(f, [4 * 4 * 4 * nf * 8, 1], 'dis_label', bias=True)
+            return dis_label
 
-            return d, y, z
+
+# class Discriminator(object):
+#     def __init__(self, n_cls, nz):
+#         self.n_cls = n_cls
+#         self.nz = nz
+#         self.enc = Encoder()
+#
+#     def __call__(self, x, c, train, nf=16, name="d_style", reuse=False):
+#         with tf.variable_scope(name, reuse=reuse):
+#             shape = x.get_shape().as_list()
+#             batch_size = shape[0]
+#
+#             if name == 'd_style':
+#                 nc = 3
+#             else:
+#                 nc = 1
+#
+#             # add noise
+#             x += tf.random_normal(shape)
+#             c += tf.random_normal(c.get_shape())
+#
+#             # encode image
+#             hc = self.enc.edge(c, train, self.n_cls, nc=nc, reuse=reuse)
+#             hc = tf.reshape(hc, [batch_size, -1])
+#
+#             # encode voxels
+#             u = conv3d(x, [4, 4, 4, nc, nf], 'h1', bias=True, stride=1)
+#             hx = lrelu(u)
+#
+#             u = conv3d(hx, [4, 4, 4, nf, nf * 2], 'h2')
+#             hx = lrelu(batch_norm(u, train, 'bn2'))
+#
+#             u = conv3d(hx, [4, 4, 4, nf * 2, nf * 4], 'h3')
+#             hx = lrelu(batch_norm(u, train, 'bn3'))
+#
+#             u = conv3d(hx, [4, 4, 4, nf * 4, nf * 8], 'h4')
+#             hx = lrelu(batch_norm(u, train, 'bn4'))
+#
+#             u = conv3d(hx, [4, 4, 4, nf * 8, nf * 16], 'h5')
+#             hx = lrelu(batch_norm(u, train, 'bn5'))
+#             hx = tf.reshape(hx, [batch_size, -1])
+#
+#             # discriminator
+#             h = tf.concat([hc, hx], 1)
+#             d = linear(h, [h.get_shape().as_list()[-1], 1], 'd', bias=True)
+#
+#             # classifier
+#             y = linear(hx, [hx.get_shape().as_list()[-1], self.n_cls], 'y', bias=True)
+#
+#             # posterior
+#             u = linear(hx, [hx.get_shape().as_list()[-1], self.nz], 'z', bias=True)
+#             z = tf.nn.tanh(u)
+#
+#             return d, y, z
