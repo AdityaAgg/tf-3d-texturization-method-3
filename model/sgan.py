@@ -237,7 +237,7 @@ class Discriminator(object):
 
             #second_conv_transpose
             dis_3 = conv3d(dis_2_post, [4, 4, 4, nf * 2 + nif2,  nf * 4], 'dis_3', bias=True, stride=1)
-            dis_3_post = tf.nn.dropout(lrelu(batch_norm(dis_3)), keep_prob(dropout, train))
+            dis_3_post = tf.nn.dropout(lrelu(batch_norm(dis_3, train, 'dis_3_bn3')), keep_prob(dropout, train))
 
             #second conv
             dis_4 = conv3d(dis_3_post, [4, 4, 4,  nf * 4, nf * 4], 'dis_4', bias=True)
@@ -247,7 +247,7 @@ class Discriminator(object):
 
             #third conv_transpose
             dis_5 = conv3d(dis_4, [4, 4, 4, nf * 4 + nif3, nf * 8], 'dis_5', bias=True, stride=1)
-            dis_5_post = tf.nn.dropout(lrelu(batch_norm(dis_5)), keep_prob(dropout, train))
+            dis_5_post = tf.nn.dropout(lrelu(batch_norm(dis_5, train, 'dis_5_bn5')), keep_prob(dropout, train))
 
             #third conv
             dis_6 = conv3d(dis_5_post, [4, 4, 4, nf * 8, nf * 8], 'dis_6', bias=True)
@@ -256,7 +256,7 @@ class Discriminator(object):
 
             #fourth conv_transpose
             dis_7 = conv3d(dis_6_post, [4, 4, 4, nf * 8 + nif4, nf * 8],'dis_7', bias=True, stride=1)
-            dis_7_post = tf.nn.dropout(lrelu(batch_norm(dis_7)), keep_prob(dropout, train))
+            dis_7_post = tf.nn.dropout(lrelu(batch_norm(dis_7, train, 'dis_7_bn7')), keep_prob(dropout, train))
 
             f = tf.reshape(dis_7_post, [-1, 4 * 4 * 4 * nf * 8])
             dis_label = linear(f, [4 * 4 * 4 * nf * 8, 1], 'dis_label', bias=True)

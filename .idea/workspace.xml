@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bfd3aed3-4aa0-40a1-8e03-e1fad52d540d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/application.py" afterPath="$PROJECT_DIR$/application.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/model/sgan.py" afterPath="$PROJECT_DIR$/model/sgan.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -13,7 +13,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="application.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="application.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/application.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="300">
@@ -37,11 +37,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sgan.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="sgan.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/model/sgan.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="654">
-              <caret line="258" column="63" lean-forward="false" selection-start-line="258" selection-start-column="63" selection-end-line="258" selection-end-column="63" />
+            <state relative-caret-position="566">
+              <caret line="258" column="80" lean-forward="false" selection-start-line="258" selection-start-column="80" selection-end-line="258" selection-end-column="80" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -116,8 +116,9 @@
       <find>dis_label</find>
       <find>discriminate</find>
       <find>self.batch_size</find>
-      <find>save</find>
       <find>batch_size</find>
+      <find>save</find>
+      <find>batch_norm</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -128,8 +129,8 @@
       <list>
         <option value="$PROJECT_DIR$/Preprocessing.ipynb" />
         <option value="$PROJECT_DIR$/dataset.py" />
-        <option value="$PROJECT_DIR$/model/sgan.py" />
         <option value="$PROJECT_DIR$/application.py" />
+        <option value="$PROJECT_DIR$/model/sgan.py" />
       </list>
     </option>
   </component>
@@ -208,7 +209,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="8" y="23" width="1680" height="1023" extended-state="6" />
+    <frame x="7" y="23" width="1680" height="1023" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2857143" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -360,20 +361,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/model/sgan.py">
+    <entry file="file://$PROJECT_DIR$/application.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="654">
-          <caret line="258" column="63" lean-forward="false" selection-start-line="258" selection-start-column="63" selection-end-line="258" selection-end-column="63" />
+        <state relative-caret-position="300">
+          <caret line="20" column="42" lean-forward="false" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/application.py">
+    <entry file="file://$PROJECT_DIR$/model/sgan.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" column="42" lean-forward="false" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
+        <state relative-caret-position="566">
+          <caret line="258" column="80" lean-forward="false" selection-start-line="258" selection-start-column="80" selection-end-line="258" selection-end-column="80" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
