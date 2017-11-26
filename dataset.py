@@ -74,9 +74,9 @@ class Dataset(object):
     #for test
 
     def get_random_sample(self):
-        random_range = self.num_examples - self.train_max
+        random_range =  self.train_max
         random_index = np.random.randint(random_range)
-        return np.expand_dims(self.test_styles[random_index], 0), np.expand_dims(self.test_pictures[random_index, :, :, 0:3],0), np.expand_dims(np.expand_dims(self.test_geometry[random_index], -1),0)
+        return np.expand_dims(self.styles[random_index], 0), np.expand_dims(self.pictures[random_index, :, :, 0:3],0), np.expand_dims(np.expand_dims(self.geometry[random_index], -1),0)
 
 
 

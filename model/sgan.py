@@ -45,9 +45,13 @@ class Model(object):
         colors = np.asarray(sess.run([self.style_gen], feed_dict=gen_feed_dict))
 
         #visualization code
-        fig = plt.figure(figsize=(10, 10))
+
+        #plot image
+        imgplot = plt.imshow(picture[0])
+        plt.show()
 
         #plot expected result
+        fig = plt.figure(figsize=(10, 10))
         ax = fig.gca(projection='3d')
         print "style max: ", np.amax(style)
         print "style min: ", np.amin(style)
