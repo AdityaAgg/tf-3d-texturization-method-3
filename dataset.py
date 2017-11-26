@@ -38,7 +38,7 @@ class Dataset(object):
 
     #for train
     def random_shuffle(self):
-        indices = np.random.shuffle(np.arange(self.num_examples))
+        indices = np.random.shuffle(np.arange(self.train_max))
         self.styles = self.styles[indices][0]
         self.geometry = self.geometry[indices][0]
         self.pictures = self.pictures[indices][0]
