@@ -2,14 +2,16 @@ import tensorflow as tf
 import config
 import util
 from ops import *
-
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from scipy import sparse
 
 class Model(object):
-    def __init__(self):
+    def __init__(self, batch_size_arg):
         self.nvx, self.npx, self.n_cls = config.shapenet_32_64()
         self.current_shapes = None
         self.nz = 100
-        self.batch_size = 64
+        self.batch_size = batch_size_arg
         self.log_step = 50
         self.z = tf.placeholder(tf.float32, [self.batch_size, self.nz])
         self.label = tf.placeholder(tf.float32, [self.batch_size, self.n_cls])
@@ -19,9 +21,6 @@ class Model(object):
         self.train = tf.placeholder(tf.bool)
         self.init_ops(self.batch_size)
         self.encoder_called = False
-
-    def print_something(self):
-        print "hello"
 
     def train_model(self, sess, dataset, num_epochs):
         iters_per_epoch = dataset.num_examples // self.batch_size
@@ -39,6 +38,53 @@ class Model(object):
                 _, gen_loss = sess.run([self.G_opt, self.gen_loss], feed_dict=gen_feed_dict)
                 # if step % self.log_step == 0:
                 print('Iteration {0}: dis loss = {1:.4f}, gen loss = {2:.4f}'.format(step, dis_loss, gen_loss))
+    def generate_one_sample(self, dataset, sess):
+        style, picture, geometry = dataset.get_random_sample()
+        noise = np.random.uniform(-1, 1, size=(self.batch_size, self.nz))
+        gen_feed_dict = {self.z: noise, self.models_binvox: geometry, self.train: True, self.color: picture}
+        colors = np.asarray(sess.run([self.style_gen], feed_dict=gen_feed_dict))
+
+        #visualization code
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.gca(projection='3d')
+
+        print np.squeeze(geometry[0]).shape
+        #print sparse.csr_matrix(np.squeeze(geometry[0]))
+        #print np.concatenate((np.squeeze(colors[0][0]), np.ones_like(np.squeeze(colors[0][0]))[0]), -1).shape
+        print np.expand_dims(np.ones_like(np.squeeze(colors[0][0]))[:, :, :, 0], -1).shape
+        print np.amax(style), "************************"
+        print np.amin(style), "************************"
+        print np.amax(picture)
+        print np.amin(picture)
+        color_vector = np.asarray(np.squeeze(style))
+        print np.amax(color_vector)
+        print np.amin(color_vector)
+        color_vector[np.where(color_vector > 0.999)] = 1.0
+        color_vector[np.where(color_vector < 0.0001)] = 0.0
+
+        print np.where(color_vector == None)
+
+        print color_vector.shape
+        # print sparse.csr_matrix(geometry[0])
+        ax.voxels(np.squeeze(geometry[0]), facecolors=color_vector, edgecolor='k')
+        plt.show()
+
+        color_vector = np.zeros(colors[0][0].shape, dtype=np.float32)
+        color_vector = (np.asarray(np.squeeze(colors[0][0])).astype(np.float32)  + 1.00001) * 0.499
+        print np.amax(color_vector)
+        print np.amin(color_vector)
+        color_vector[np.where(color_vector>0.999)] = 1.0
+        color_vector[np.where(color_vector < 0.0001)] = 0.0
+
+        print np.where(color_vector == None)
+
+        print color_vector.shape
+        #print sparse.csr_matrix(geometry[0])
+        ax.voxels(np.squeeze(geometry[0]), facecolors = color_vector, edgecolor='k')
+        plt.show()
+
+        return geometry, colors
+        #TODO: some code to go here
 
     def init_ops(self, batch_size=1):
 
@@ -147,26 +193,26 @@ class Generator(object):
             h4 = tf.tile(tf.expand_dims(h4, 1), [1, 4, 1, 1, 1])
             h3 = tf.tile(tf.expand_dims(h3, 1), [1, 8, 1, 1, 1])
             h2 = tf.tile(tf.expand_dims(h2, 1), [1, 16, 1, 1, 1])
-
+            print "layer 1"
             c = conv3d(voxel, [4, 4, 4, 1, nf], 'e1', bias=True, stride=1)
             e1 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 2"
             c = conv3d(e1, [4, 4, 4, nf, nf * 2], 'e2', bias=True)
             e2 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 3"
             c = conv3d(e2, [4, 4, 4, nf * 2, nf * 4], 'e3', bias=True)
             e3 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 4"
             c = conv3d(e3, [4, 4, 4, nf * 4, nf * 8], 'e4', bias=True)
             e4 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 5"
             c = deconv3d(tf.concat([e4, h4], 4), [4, 4, 4, nf * 8, nf * 8 + nif4], [batch_size, 8, 8, 8, nf * 8], 'd6',
                          bias=True)
             d6 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 6"
             c = conv3d(d6, [4, 4, 4, nf * 8, nf * 4], 'd5', bias=True, stride=1)
             d5 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-
+            print "layer 7"
             c = deconv3d(tf.concat([d5, h3], 4), [4, 4, 4, nf * 4, nf * 4 + nif3], [batch_size, 16, 16, 16, nf * 4],
                          'd4', bias=True)
             d4 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))

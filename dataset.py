@@ -11,9 +11,11 @@ class Dataset(object):
 
 
     def load_data(self):
-        self.styles = np.load('data/preprocessed/colored.npz')['a']
+        self.styles = np.load('data/preprocessed/colored.npz')['a']/255.0
         self.geometry = np.load('data/preprocessed/voxels.npz')['a']
+        print np.amax(self.styles)
         self.pictures = np.load('data/preprocessed/image.npz')['a']
+        print np.amax(self.pictures)
         print self.geometry.shape
         print self.pictures.shape
         print self.styles.shape
@@ -38,6 +40,11 @@ class Dataset(object):
             assert batch_size <= self.num_examples
         end = self.index_in_epoch
         return self.read_data(start, end)
+
+    def get_random_sample(self):
+        random_index = np.random.randint(self.num_examples)
+        return np.expand_dims(self.styles[random_index], 0), np.expand_dims(self.pictures[random_index, :, :, 0:3],0), np.expand_dims(np.expand_dims(self.geometry[random_index], -1),0)
+
 
 
     def read_data(self, start, end):
