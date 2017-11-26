@@ -48,11 +48,11 @@ class Dataset(object):
         print "batch size ", batch_size
         start = self.index_in_epoch
         self.index_in_epoch += batch_size
-        if self.index_in_epoch > self.num_examples:
+        if self.index_in_epoch > self.train_max:
             self.random_shuffle()
             start = 0
             self.index_in_epoch = batch_size
-            assert batch_size <= self.num_examples
+            assert batch_size <= self.train_max
         end = self.index_in_epoch
         return self.read_data(start, end)
 
