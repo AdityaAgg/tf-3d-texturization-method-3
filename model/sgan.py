@@ -227,40 +227,40 @@ class Discriminator(object):
             # let us say some tanh inverse function
             #first conv_transpose
             dis_1 = conv3d(x, [4, 4, 4, nc, nf*2],  'dis_1', bias=True, stride=1) #turning off stride 1 on conv_transposes
-            dis_1_post = tf.nn.dropout(tf.nn.elu(dis_1), keep_prob(dropout, train))
+            dis_1_post = tf.nn.dropout(lrelu(dis_1), keep_prob(dropout, train))
 
             #first conv
             dis_2 = conv3d(dis_1_post, [4, 4, 4,  nf * 2, nf * 2],'dis_2', bias=True)
             dis_2 = tf.concat([dis_2, h2], 4)
-            dis_2_post = tf.nn.dropout(tf.nn.elu(dis_2), keep_prob(dropout, train))
+            dis_2_post = tf.nn.dropout(lrelu(dis_2), keep_prob(dropout, train))
 
 
             #second_conv_transpose
             dis_3 = conv3d(dis_2_post, [4, 4, 4, nf * 2 + nif2,  nf * 4], 'dis_3', bias=True, stride=1)
-            dis_3_post = tf.nn.dropout(tf.nn.elu(dis_3), keep_prob(dropout, train))
+            dis_3_post = tf.nn.dropout(lrelu(batch_norm(dis_3)), keep_prob(dropout, train))
 
             #second conv
             dis_4 = conv3d(dis_3_post, [4, 4, 4,  nf * 4, nf * 4], 'dis_4', bias=True)
             dis_4 = tf.concat([dis_4, h3], 4)
-            dis_4_post = tf.nn.dropout(tf.nn.elu(dis_4), keep_prob(dropout, train))
+            dis_4_post = tf.nn.dropout(lrelu(dis_4), keep_prob(dropout, train))
 
 
             #third conv_transpose
             dis_5 = conv3d(dis_4, [4, 4, 4, nf * 4 + nif3, nf * 8], 'dis_5', bias=True, stride=1)
-            dis_5_post = tf.nn.dropout(tf.nn.elu(dis_5), keep_prob(dropout, train))
+            dis_5_post = tf.nn.dropout(lrelu(batch_norm(dis_5)), keep_prob(dropout, train))
 
             #third conv
             dis_6 = conv3d(dis_5_post, [4, 4, 4, nf * 8, nf * 8], 'dis_6', bias=True)
             dis_6 = tf.concat([dis_6, h4], 4)
-            dis_6_post = tf.nn.dropout(tf.nn.elu(dis_6), keep_prob(dropout, train))
+            dis_6_post = tf.nn.dropout(lrelu(dis_6), keep_prob(dropout, train))
 
             #fourth conv_transpose
             dis_7 = conv3d(dis_6_post, [4, 4, 4, nf * 8 + nif4, nf * 8],'dis_7', bias=True, stride=1)
-            dis_7_post = tf.nn.dropout(tf.nn.elu(dis_7), keep_prob(dropout, train))
+            dis_7_post = tf.nn.dropout(lrelu(batch_norm(dis_7)), keep_prob(dropout, train))
 
             f = tf.reshape(dis_7_post, [-1, 4 * 4 * 4 * nf * 8])
             dis_label = linear(f, [4 * 4 * 4 * nf * 8, 1], 'dis_label', bias=True)
-            return dis_label
+            return tf.nn.tanh(dis_label)
 
 
 # class Discriminator(object):
