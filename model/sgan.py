@@ -193,26 +193,19 @@ class Generator(object):
             h4 = tf.tile(tf.expand_dims(h4, 1), [1, 4, 1, 1, 1])
             h3 = tf.tile(tf.expand_dims(h3, 1), [1, 8, 1, 1, 1])
             h2 = tf.tile(tf.expand_dims(h2, 1), [1, 16, 1, 1, 1])
-            print "layer 1"
             c = conv3d(voxel, [4, 4, 4, 1, nf], 'e1', bias=True, stride=1)
             e1 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 2"
             c = conv3d(e1, [4, 4, 4, nf, nf * 2], 'e2', bias=True)
             e2 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 3"
             c = conv3d(e2, [4, 4, 4, nf * 2, nf * 4], 'e3', bias=True)
             e3 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 4"
             c = conv3d(e3, [4, 4, 4, nf * 4, nf * 8], 'e4', bias=True)
             e4 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 5"
             c = deconv3d(tf.concat([e4, h4], 4), [4, 4, 4, nf * 8, nf * 8 + nif4], [batch_size, 8, 8, 8, nf * 8], 'd6',
                          bias=True)
             d6 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 6"
             c = conv3d(d6, [4, 4, 4, nf * 8, nf * 4], 'd5', bias=True, stride=1)
             d5 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
-            print "layer 7"
             c = deconv3d(tf.concat([d5, h3], 4), [4, 4, 4, nf * 4, nf * 4 + nif3], [batch_size, 16, 16, 16, nf * 4],
                          'd4', bias=True)
             d4 = tf.nn.dropout(tf.nn.elu(c), keep_prob(dropout, train))
