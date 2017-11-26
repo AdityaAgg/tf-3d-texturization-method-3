@@ -10,7 +10,7 @@ tf.reset_default_graph()
 config_proto = config = tf.ConfigProto()
 config_proto.gpu_options.allow_growth = True
 sess = tf.Session(config=config_proto)
-model_object = sgan.Model(1)
+model_object = sgan.Model(32)
 dataset = dataset.Dataset()
 
 sess.run(tf.global_variables_initializer())
