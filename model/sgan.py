@@ -260,7 +260,7 @@ class Discriminator(object):
 
             f = tf.reshape(dis_7_post, [-1, 4 * 4 * 4 * nf * 8])
             dis_label = linear(f, [4 * 4 * 4 * nf * 8, 1], 'dis_label', bias=True)
-            return tf.nn.tanh(dis_label)
+            return dis_label
 
 
 # class Discriminator(object):
