@@ -24,7 +24,7 @@ class Dataset(object):
         self.num_examples = self.styles.shape[0]
 
 
-        self.train_max = int(0.8*self.num_examples)
+        self.train_max = self.num_examples
 
         #test set
         self.test_geometry = self.geometry[self.train_max:self.num_examples]
