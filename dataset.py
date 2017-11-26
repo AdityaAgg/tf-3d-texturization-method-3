@@ -10,9 +10,11 @@ class Dataset(object):
         self.random_shuffle()
 
 
+
     def load_data(self):
         self.styles = np.load('data/preprocessed/colored.npz')['a']/255.0
         self.geometry = np.load('data/preprocessed/voxels.npz')['a']
+
         print np.amax(self.styles)
         self.pictures = np.load('data/preprocessed/image.npz')['a']
         print np.amax(self.pictures)
@@ -22,6 +24,19 @@ class Dataset(object):
         self.num_examples = self.styles.shape[0]
 
 
+        self.train_max = self.num_examples * int(0.8*3554)
+
+        #test set
+        self.test_geometry = self.geometry[self.train_max:self.num_examples]
+        self.test_styles = self.styles[self.train_max:self.num_examples]
+        self.test_pictures = self.pictures[self.train_max:self.num_examples]
+
+        #train set
+        self.geometry = self.geometry[0:self.train_max]
+        self.styles = self.styles[0:self.train_max]
+        self.pictures = self.pictures[0:self.train_max]
+
+    #for train
     def random_shuffle(self):
         indices = np.random.shuffle(np.arange(self.num_examples))
         self.styles = self.styles[indices][0]
@@ -41,11 +56,6 @@ class Dataset(object):
         end = self.index_in_epoch
         return self.read_data(start, end)
 
-    def get_random_sample(self):
-        random_index = np.random.randint(self.num_examples)
-        return np.expand_dims(self.styles[random_index], 0), np.expand_dims(self.pictures[random_index, :, :, 0:3],0), np.expand_dims(np.expand_dims(self.geometry[random_index], -1),0)
-
-
 
     def read_data(self, start, end):
         print start
@@ -57,3 +67,17 @@ class Dataset(object):
         pictures = self.pictures[start:end, :, :, 0:3]
         print pictures.shape
         return styles, pictures, geometry
+
+
+
+
+    #for test
+
+    def get_random_sample(self):
+        random_range = self.num_examples - self.train_max
+        random_index = np.random.randint(random_range)
+        return np.expand_dims(self.test_styles[random_index], 0), np.expand_dims(self.test_pictures[random_index, :, :, 0:3],0), np.expand_dims(np.expand_dims(self.test_geometry[random_index], -1),0)
+
+
+
+

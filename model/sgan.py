@@ -46,41 +46,28 @@ class Model(object):
 
         #visualization code
         fig = plt.figure(figsize=(10, 10))
-        ax = fig.gca(projection='3d')
 
-        print np.squeeze(geometry[0]).shape
-        #print sparse.csr_matrix(np.squeeze(geometry[0]))
-        #print np.concatenate((np.squeeze(colors[0][0]), np.ones_like(np.squeeze(colors[0][0]))[0]), -1).shape
-        print np.expand_dims(np.ones_like(np.squeeze(colors[0][0]))[:, :, :, 0], -1).shape
-        print np.amax(style), "************************"
-        print np.amin(style), "************************"
-        print np.amax(picture)
-        print np.amin(picture)
+        #plot expected result
+        ax = fig.gca(projection='3d')
+        print "style max: ", np.amax(style)
+        print "style min: ", np.amin(style)
+        print "picture max: ", np.amax(picture)
+        print "picture min: ", np.amin(picture)
         color_vector = np.asarray(np.squeeze(style))
-        print np.amax(color_vector)
-        print np.amin(color_vector)
         color_vector[np.where(color_vector > 0.999)] = 1.0
         color_vector[np.where(color_vector < 0.0001)] = 0.0
-
-        print np.where(color_vector == None)
-
-        print color_vector.shape
-        # print sparse.csr_matrix(geometry[0])
         ax.voxels(np.squeeze(geometry[0]), facecolors=color_vector, edgecolor='k')
         plt.show()
 
-        color_vector = np.zeros(colors[0][0].shape, dtype=np.float32)
+
+        #plot generated result
+        fig2 = plt.figure(figsize=(10, 10))
+        ax2 = fig2.gca(projection='3d')
         color_vector = (np.asarray(np.squeeze(colors[0][0])).astype(np.float32)  + 1.00001) * 0.499
-        print np.amax(color_vector)
-        print np.amin(color_vector)
         color_vector[np.where(color_vector>0.999)] = 1.0
         color_vector[np.where(color_vector < 0.0001)] = 0.0
 
-        print np.where(color_vector == None)
-
-        print color_vector.shape
-        #print sparse.csr_matrix(geometry[0])
-        ax.voxels(np.squeeze(geometry[0]), facecolors = color_vector, edgecolor='k')
+        ax2.voxels(np.squeeze(geometry[0]), facecolors = color_vector, edgecolor='k')
         plt.show()
 
         return geometry, colors

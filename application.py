@@ -10,24 +10,25 @@ tf.reset_default_graph()
 config_proto = config = tf.ConfigProto()
 config_proto.gpu_options.allow_growth = True
 sess = tf.Session(config=config_proto)
-model_object = sgan.Model(64)
+model_object = sgan.Model(1)
 dataset = dataset.Dataset()
 
 sess.run(tf.global_variables_initializer())
-
-#saver.restore(sess, "params_b/sgan")
+saver = tf.train.Saver(model_object.vars_G + model_object.vars_E + model_object.vars_D)
+saver.restore(sess, "params_b/sgan")
 
 # train
-model_object.train_model(sess, dataset, 10)
+#model_object.train_model(sess, dataset, 10)
 
 # test
-#model_object.generate_one_sample(dataset, sess)
+
+model_object.generate_one_sample(dataset, sess)
 
 
 # saver
 
-saver = tf.train.Saver(model_object.vars_G + model_object.vars_E + model_object.vars_D)
-saver.save(sess, 'params_b/sgan')
+
+#saver.save(sess, 'params_b/sgan')
 
 # opt_engine = ConstrainedOpt(model)
 
