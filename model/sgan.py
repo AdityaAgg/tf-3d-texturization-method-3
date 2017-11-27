@@ -38,43 +38,78 @@ class Model(object):
                 _, gen_loss = sess.run([self.G_opt, self.gen_loss], feed_dict=gen_feed_dict)
                 # if step % self.log_step == 0:
                 print('Iteration {0}: dis loss = {1:.4f}, gen loss = {2:.4f}'.format(step, dis_loss, gen_loss))
+
+    def vizvox(self, gen_colors, gen_voxels, expected_colors):
+        gen_voxels, expected_voxels = np.squeeze(gen_voxels)
+
+        num_rows = int(len(gen_voxels)/8)
+        num_cols = 8
+
+        fig = plt.figure(figsize=(16, 8))
+        outer = gridspec.GridSpec(num_rows, num_cols, wspace=0.2, hspace=0.2)
+
+        for i in range(num_rows):
+            inner = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=outer[i], wspace=0.1, hspace=0.1)
+            j = 0
+
+            ax = plt.Subplot(fig, inner[j], projection='3d')
+            ax.set_title("Generated Voxels", y=1.05)
+            ax.voxels(gen_voxels[i], facecolors=gen_colors[i])
+            ax = plt.Subplot(fig, inner[j+1], projection='3d')
+            ax.set_title("Expected Voxels", y=1.05)
+            ax.voxels(gen_voxels[i], facecolors=expected_colors[i])
+
+        plt.show()
+
+
     def generate_one_sample(self, dataset, sess):
         style, picture, geometry = dataset.get_random_sample()
         noise = np.random.uniform(-1, 1, size=(self.batch_size, self.nz))
         gen_feed_dict = {self.z: noise, self.models_binvox: geometry, self.train: True, self.color: picture}
         colors = np.asarray(sess.run([self.style_gen], feed_dict=gen_feed_dict))
 
+
+
+
         #visualization code
 
         #plot image
-        imgplot = plt.imshow(picture[0])
-        plt.show()
+        #imgplot = plt.imshow(picture[0])
+        #plt.show()
 
-        #plot expected result
-        fig = plt.figure(figsize=(10, 10))
-        ax = fig.gca(projection='3d')
-        print "style max: ", np.amax(style)
-        print "style min: ", np.amin(style)
-        print "picture max: ", np.amax(picture)
-        print "picture min: ", np.amin(picture)
+
+
+        #
+        # #plot expected result
+        # fig = plt.figure(figsize=(10, 10))
+        # ax = fig.gca(projection='3d')
+        # print "style max: ", np.amax(style)
+        # print "style min: ", np.amin(style)
+        # print "picture max: ", np.amax(picture)
+        # print "picture min: ", np.amin(picture)
+
         color_vector = np.asarray(np.squeeze(style))
         color_vector[np.where(color_vector > 0.999)] = 1.0
         color_vector[np.where(color_vector < 0.0001)] = 0.0
-        ax.voxels(np.squeeze(geometry[0]), facecolors=color_vector, edgecolor='k')
-        plt.show()
 
+        color_vector_2 = (np.asarray(np.squeeze(colors[0][0])).astype(np.float32) + 1.00001) * 0.499
+        color_vector_2[np.where(color_vector > 0.999)] = 1.0
+        color_vector_2[np.where(color_vector < 0.0001)] = 0.0
+        self.vizvox(expected_colors=color_vector,  gen_voxels=geometry[0], gen_colors=color_vector_2)
 
-        #plot generated result
-        fig2 = plt.figure(figsize=(10, 10))
-        ax2 = fig2.gca(projection='3d')
-        color_vector = (np.asarray(np.squeeze(colors[0][0])).astype(np.float32)  + 1.00001) * 0.499
-        color_vector[np.where(color_vector>0.999)] = 1.0
-        color_vector[np.where(color_vector < 0.0001)] = 0.0
+        #ax.voxels(np.squeeze(geometry[0]), facecolors=color_vector, edgecolor='k')
+        # plt.show()
+        #
+        #
+        # #plot generated result
+        # fig2 = plt.figure(figsize=(10, 10))
+        # ax2 = fig2.gca(projection='3d')
 
-        ax2.voxels(np.squeeze(geometry[0]), facecolors = color_vector, edgecolor='k')
-        plt.show()
-
-        return geometry, colors
+        #
+        # ax2.voxels(np.squeeze(geometry[0]), facecolors = color_vector, edgecolor='k')
+        # plt.show()
+        #
+        # return geometry, colors
         #TODO: some code to go here
 
     def init_ops(self, batch_size=1):
